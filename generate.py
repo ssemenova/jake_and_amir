@@ -1,8 +1,10 @@
 import numpy as np
 
-trump = open('corpus.txt').read()
+amir = open('amir.txt').read()
+jake = open('jake.txt').read()
 
-corpus = trump.split()
+amir_corpus = amir.split()
+jake_corpus = jake.split()
 
 def make_pairs(corpus):
     for i in range(len(corpus)-1):
@@ -30,4 +32,4 @@ n_words = 50
 for i in range(n_words):
     chain.append(np.random.choice(word_dict[chain[-1]]))
 
-' '.join(chain)
+print(' '.join(chain))
