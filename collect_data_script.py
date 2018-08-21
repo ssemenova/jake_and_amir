@@ -95,3 +95,8 @@ for line in archive_file:
                 full_quote += cleaned_line + " "
     elif "<div class=\"episode-script-inner\">" in line:
         is_script = True
+
+
+# just for good measure
+for file in (jake_text, amir_text, action_text):
+    

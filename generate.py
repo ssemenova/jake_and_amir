@@ -1,4 +1,7 @@
 import numpy as np
+import random
+
+window_size = 2
 
 def setup():
     amir_text = open('data/amir.txt').read()
@@ -9,32 +12,27 @@ def setup():
     jake_corpus = jake_text.split()
     action_corpus = action_text.split()
 
-    word_dict_amir = get_word_dict(amir_corpus)
-    word_dict_jake = get_word_dict(jake_corpus)
-    word_dict_actions = get_word_dict(action_corpus)
+    model_amir = get_model(amir_corpus)
+    model_jake = get_model(jake_corpus)
+    model_actions = get_model(action_corpus)
 
-    Amir = {"corpus": amir_corpus, "word_dict": word_dict_amir}
-    Jake = {"corpus": jake_corpus, "word_dict": word_dict_jake}
-    Actions = {"corpus": action_corpus, "word_dict": word_dict_actions}
+    Amir = {"corpus": amir_corpus, "model": model_amir}
+    Jake = {"corpus": jake_corpus, "model": model_jake}
+    Actions = {"corpus": action_corpus, "model": model_actions}
 
     return Amir, Jake, Actions
 
-def get_word_dict(corpus):
-    def make_pairs(corpus):
-        for i in range(len(corpus)-1):
-            yield (corpus[i], corpus[i+1])
+def get_model(corpus):
+    model = {}
 
-    pairs = make_pairs(corpus)
-
-    word_dict = {}
-
-    for word_1, word_2 in pairs:
-        if word_1 in word_dict.keys():
-            word_dict[word_1].append(word_2)
+    for i in range(0, len(corpus)-window_size):
+        window = tuple(corpus[i:i+window_size])
+        if window in model:
+            model[window].append(corpus[i+window_size])
         else:
-            word_dict[word_1] = [word_2]
+            model[window] = [corpus[i+window_size]]
 
-    return word_dict
+    return model
 
 def generate_interleaving():
     length_allowed = np.random.randint(2,6)
@@ -54,7 +52,7 @@ def generate_interleaving():
 
 def generate_action(person_dict):
     corpus = person_dict["corpus"]
-    word_dict = person_dict["word_dict"]
+    model = person_dict["model"]
     terminate_chars = ["]"]
 
     first_word = np.random.choice(corpus)
@@ -65,12 +63,11 @@ def generate_action(person_dict):
     chain = [first_word]
 
     n_words = np.floor(np.random.normal(10, 5))
-
     generate = True
     while generate:
-        new_word = np.random.choice(word_dict[chain[-1]])
+        new_word = np.random.choice(model[chain[-1]])
         while "[" in new_word:
-            new_word = np.random.choice(word_dict[chain[-1]])
+            new_word = np.random.choice(model[chain[-1]])
         if "]" in new_word:
             generate = False
         chain.append(new_word)
@@ -80,31 +77,35 @@ def generate_action(person_dict):
 
 def generate_dialogue(person_dict):
     corpus = person_dict["corpus"]
-    word_dict = person_dict["word_dict"]
+    model = person_dict["model"]
     terminate_chars = [".", "?", "???", ". . . ?", "...", "--", "!"]
     open_punctuation = ["(", ")", "[", "]", "\""]
 
-    first_word = np.random.choice(corpus)
+    # import pdb; pdb.set_trace()
+    first_clump = random.choice(model.keys())
+    while first_clump[0].islower():
+        first_clump = random.choice(model.keys())
 
-    while first_word.islower():
-        first_word = np.random.choice(corpus)
-
-    chain = [first_word]
+    chain = []
+    for i in first_clump:
+        chain.append(i)
 
     # n_words = np.floor(np.random.normal(15, 10))
-    n_words = np.random.randint(5, 20)
+    n_words = np.random.randint(5, 25)
     generate = True
     count = 0
     while generate:
-        new_word = np.random.choice(word_dict[chain[-1]])
-        while any(word in new_word for word in open_punctuation):
-            new_word = np.random.choice(word_dict[chain[-1]])
+        if not all(word in model[tuple(chain[0-window_size:])] for word in open_punctuation):
+            new_clump = random.choice(model[tuple(chain[0-window_size:])])
+            while any(word in new_clump for word in open_punctuation):
+                new_clump = random.choice(model[tuple(chain[0-window_size:])])
+
 
         count += 1
-        if any(word in new_word for word in terminate_chars) and count > n_words:
+        if any(word in new_clump for word in terminate_chars) and count > n_words:
             generate = False
 
-        chain.append(new_word)
+        chain.append(new_clump)
 
 
     return ' '.join(chain)
@@ -117,11 +118,11 @@ print(interleaving)
 print("AMIR")
 for i in range(0,10):
     print(generate_dialogue(Amir))
-#
-# print("JAKE")
-# for i in range(0,10):
-#     print(generate_dialogue(Jake))
-#
+
+print("JAKE")
+for i in range(0,10):
+    print(generate_dialogue(Jake))
+
 # print("ACTION")
 # for i in range(0,10):
 #     print(generate_action(Actions))
