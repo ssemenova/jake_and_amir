@@ -1,9 +1,9 @@
 import numpy as np
 
 def setup():
-    amir_text = open('amir.txt').read()
-    jake_text = open('jake.txt').read()
-    action_text = open('action.txt').read()
+    amir_text = open('data/amir.txt').read()
+    jake_text = open('data/jake.txt').read()
+    action_text = open('data/action.txt').read()
 
     amir_corpus = amir_text.split()
     jake_corpus = jake_text.split()

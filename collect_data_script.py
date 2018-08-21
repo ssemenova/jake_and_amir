@@ -1,11 +1,11 @@
 # Really gross pls don't look
 import re, sre_constants
 
-archive_file = open("archive.txt", "r")
-jake_text = open("jake.txt", "w")
-amir_text = open("amir.txt", "w")
-action_text = open("action.txt", "w")
-modifiers = open("modifiers.txt", "w")
+archive_file = open("data/archive.txt", "r")
+jake_text = open("data/jake.txt", "w")
+amir_text = open("data/amir.txt", "w")
+action_text = open("data/action.txt", "w")
+modifiers = open("data/modifiers.txt", "w")
 
 def get_text_from_line(line):
     line = line.strip()
