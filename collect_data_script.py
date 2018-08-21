@@ -1,5 +1,5 @@
 # Really gross pls don't look
-import re
+import re, sre_constants
 
 archive_file = open("archive.txt", "r")
 jake_text = open("jake.txt", "w")
@@ -9,37 +9,45 @@ modifiers = open("modifiers.txt", "w")
 
 def get_text_from_line(line):
     line = line.strip()
-    repls = ('<br>',''),('<span class="highlight">', ''),('</span>', ''),("INTRO", '')
+    repls = (('<br>',''),('<span class="highlight">', ''),('</span>', ''),("INTRO", ''))
     return reduce(lambda a, kv: a.replace(*kv), repls, line)
 
 def remove_actions_from_dialogue(line):
     # import pdb; pdb.set_trace()
     action = new_line = ""
-    print(line)
-    split_bracket = re.split(line, "(\[|\])")
-    save_next_section = False
-    for section in split_bracket:
-        if "[" in section:
-            save_next_section = True
-        elif save_next_section:
-            action += section
-        elif "]" in section:
-            save_next_section = False
-        else:
-            new_line += section
 
-    split_paren = re.split(new_line, "(\(|\))")
-    new_line = ""
-    for section in split_paren:
-        if "(" in section:
-            save_next_section = True
-        elif save_next_section:
-            modifiers.write(section + "\n")
-            print(section + "\n")
-        elif ")" in section:
-            save_next_section = False
-        else:
-            new_line += section
+    # import pdb; pdb.set_trace()
+    try:
+        split_bracket = re.split("(\[|\])", line)
+        save_next_section = False
+        for section in split_bracket:
+            if "[" in section:
+                save_next_section = True
+                action += "["
+            elif "]" in section:
+                save_next_section = False
+            elif save_next_section:
+                action += section + "] \n"
+            elif section:
+                new_line += section
+    except sre_constants.error:
+        pass
+
+    #Not worth the headache to resolve
+    try:
+        split_paren = re.split("(\(|\))", new_line)
+        new_line = ""
+        for section in split_paren:
+            if "(" in section:
+                save_next_section = True
+            elif ")" in section:
+                save_next_section = False
+            elif save_next_section:
+                modifiers.write("(" + section + ")\n")
+            elif section:
+                new_line += section
+    except sre_constants.error:
+        pass
 
     return new_line, action
 
@@ -80,7 +88,6 @@ for line in archive_file:
                     speaker_carryover = "jake"
                 elif "AMIR" in speaker or "Amir" in speaker:
                     speaker_carryover = "amir"
-                print(line)
                 for section in split_line[1:]:
                     full_quote += section.lstrip() + " "
             elif "[" in cleaned_line:

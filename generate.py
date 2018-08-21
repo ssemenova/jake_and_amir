@@ -117,11 +117,11 @@ print(interleaving)
 print("AMIR")
 for i in range(0,10):
     print(generate_dialogue(Amir))
-
-print("JAKE")
-for i in range(0,10):
-    print(generate_dialogue(Jake))
-
-print("ACTION")
-for i in range(0,10):
-    print(generate_action(Actions))
+#
+# print("JAKE")
+# for i in range(0,10):
+#     print(generate_dialogue(Jake))
+#
+# print("ACTION")
+# for i in range(0,10):
+#     print(generate_action(Actions))
